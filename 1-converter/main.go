@@ -37,6 +37,16 @@ func main() {
 
 	}
 
+	for {
+		targetCurrency, err := targetCurrency(sourceCurrency)
+		if err != nil {
+			fmt.Println("Ошибка:", err)
+		} else {
+			fmt.Println("Целевая валюта:", targetCurrency)
+			break
+		}
+	}
+
 }
 
 func choiseSourceCurrency() (string, error) {
@@ -70,5 +80,31 @@ func amountCurrency() (float64, error) {
 
 		}
 
+	}
+}
+
+func targetCurrency(sourceCurrency string) (string, error) {
+	for {
+		var prompt string
+		switch sourceCurrency {
+		case "USD":
+			prompt = "Выберите целевую валюту (EUR, RUB): "
+		case "EUR":
+			prompt = "Выберите целевую валюту (USD, RUB): "
+		case "RUB":
+			prompt = "Выберите целевую валюту (USD, EUR): "
+		}
+		fmt.Print(prompt)
+		var input string
+		fmt.Scan(&input)
+
+		// Проверка введенной валюты
+		if (sourceCurrency == "USD" && (input == "EUR" || input == "RUB")) ||
+			(sourceCurrency == "EUR" && (input == "USD" || input == "RUB")) ||
+			(sourceCurrency == "RUB" && (input == "USD" || input == "EUR")) {
+			return input, nil
+		}
+
+		return "", errors.New("Неправильная валюта. Попробуйте еще раз.")
 	}
 }
