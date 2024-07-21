@@ -6,47 +6,83 @@ import (
 	"strconv"
 )
 
+const (
+	usdToEurRate = 0.93
+	usdToRubRate = 88.50
+)
+
 func main() {
+	sourceCurrency := getSourceCurrency()
+	amount := getAmount()
+	targetCurrency := getTargetCurrency(sourceCurrency)
 
-	const (
-		usdToEurRate = 0.93
-		usdToRubRate = 88.50
-	)
+	convertedAmount, err := convertCurrency(amount, sourceCurrency, targetCurrency)
+	if err != nil {
+		fmt.Println("Ошибка конвертации:", err)
+	} else {
+		fmt.Printf("%.2f %s = %.2f %s\n", amount, sourceCurrency, convertedAmount, targetCurrency)
+	}
+}
 
-	var sourceCurrency string
-	var err error
+func convertCurrency(amount float64, sourceCurrency, targetCurrency string) (float64, error) {
 
+	// Все конвертации проходят через доллар США
+	var usdAmount float64
+	switch sourceCurrency {
+	case "USD":
+		usdAmount = amount
+	case "EUR":
+		usdAmount = amount / usdToEurRate
+	case "RUB":
+		usdAmount = amount / usdToRubRate
+	default:
+		return 0, errors.New("Неподдерживаемая исходная валюта")
+	}
+
+	switch targetCurrency {
+	case "USD":
+		return usdAmount, nil
+	case "EUR":
+		return usdAmount * usdToEurRate, nil
+	case "RUB":
+		return usdAmount * usdToRubRate, nil
+	default:
+		return 0, errors.New("Неподдерживаемая целевая валюта")
+	}
+
+}
+
+func getSourceCurrency() string {
 	for {
-		sourceCurrency, err = choiseSourceCurrency()
+		sourceCurrency, err := choiseSourceCurrency()
 		if err != nil {
 			fmt.Printf("Ошибка: %s\n", err)
 		} else {
-			fmt.Printf("Исходная валюта: %s\n", sourceCurrency)
-			break
+			return sourceCurrency
 		}
 	}
+}
 
+func getAmount() float64 {
 	for {
 		amount, err := amountCurrency()
 		if err != nil {
-			fmt.Println("Ошибка:", err) // Это сообщение не должно выводиться, так как функция не возвращает ошибку
+			fmt.Println("Ошибка:", err)
 		} else {
-			fmt.Println("Введенная сумма: ", amount)
-			break
+			return amount
 		}
-
 	}
+}
 
+func getTargetCurrency(sourceCurrency string) string {
 	for {
 		targetCurrency, err := targetCurrency(sourceCurrency)
 		if err != nil {
 			fmt.Println("Ошибка:", err)
 		} else {
-			fmt.Println("Целевая валюта:", targetCurrency)
-			break
+			return targetCurrency
 		}
 	}
-
 }
 
 func choiseSourceCurrency() (string, error) {
